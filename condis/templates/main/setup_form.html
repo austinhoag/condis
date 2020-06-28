@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<title>jQuery UI Slider - Range slider</title>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script>
+	$( function() {
+		$( "#temp-range" ).slider({
+			range: true,
+			min: 0,
+			max: 100,
+			values: [ 0, 70 ],
+			slide: function( event, ui ) {
+				$( "#temp-field" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+			}
+		});
+		$( "#temp-field" ).val($( "#temp-range" ).slider( "values", 0 ) +
+			" - " + $( "#temp-range" ).slider( "values", 1 ) );
+	} );
+	</script>
+
+	<script>
+	$( function() {
+		$( "#humidity-range" ).slider({
+			range: true,
+			min: 0,
+			max: 100,
+			values: [ 0, 70 ],
+			slide: function( event, ui ) {
+				$( "#humidity-field" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+			}
+		});
+		$( "#humidity-field" ).val($( "#humidity-range" ).slider( "values", 0 ) +
+			" - " + $( "#humidity-range" ).slider( "values", 1 ) );
+	} );
+	</script>
+
+	<script>
+	$( function() {
+		$( "#precip-range" ).slider({
+			range: true,
+			min: 0,
+			max: 100,
+			values: [ 0, 70 ],
+			slide: function( event, ui ) {
+				$( "#precip-field" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+			}
+		});
+		$( "#precip-field" ).val($( "#precip-range" ).slider( "values", 0 ) +
+			" - " + $( "#precip-range" ).slider( "values", 1 ) );
+	} );
+	</script>
+
+
+<h1 align="center" class="mb-4">Condis Setup Form</h1>
+<hr class='class-4'>
+ 
+<form method="POST" action="">
+
+	<div align="center">
+		<label for="temp-field">Temperature:</label>
+		<input type="text" name='temp' id="temp-field" readonly style="font-weight:bold;">
+		<div id="temp-range"></div>
+	</div>
+	
+
+	<hr class='class-2'>
+
+	<div align="center">
+		<label for="humidity-field">Relative humidity:</label>
+		<input type="text" name='humidity' id="humidity-field" readonly style="font-weight:bold;">
+		<div id="humidity-range"></div>
+	</div>
+
+	<hr class='class-2'>
+
+	<div align="center">
+		<label for="precip-field">Probability of precipitation:</label>
+		<input type="text" name='precip' id="precip-field" readonly style="font-weight:bold;">
+		<div id="precip-range"></div>
+	</div>
+	
+
+
+<hr class='class-2'>
+	<input class="btn btn-lg btn-info mt-2" id="submit" name="submit" type="submit" value="Submit">
+</form>
+
+{% endblock content %}

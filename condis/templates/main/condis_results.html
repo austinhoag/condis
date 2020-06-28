@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<h1 align="center" class="mb-4">Condis Results</h1>
+<hr class='class-4'>
+
+{% if no_results %}
+	<p> Sorry, there are no times in the forecast with these kind of condis. </p>
+{% endif %}
+<ul>
+	<legend> There are some good condis near you! </legend>
+	{% for print_str in all_print_strs %}
+		<li> {{print_str}} </li>
+	{% endfor %}
+</ul>
+{% endblock content %}
