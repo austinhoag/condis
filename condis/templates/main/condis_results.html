@@ -1,16 +1,23 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<h1 align="center" class="mb-4">Condis Results</h1>
+<h3 class="mb-2">Results for:</h3>
+<p> Coordinates: {{gps_str}}</br>
+Temp range: {{temp_str}} (&deg;F)</br>
+Relative humidity range: {{humidity_str}} (%)</br>
+Chance precip range: {{precip_str}} (%)
+</p>
 <hr class='class-4'>
 
 {% if no_results %}
-	<p> Sorry, there are no times in the forecast with these kind of condis. </p>
+	<p> Sorry, there are no times in the forecast satisfying your search criteria. </p>
+{% else %}
+<h5>Found some good condis! </h5>
+	<ul>
+		{% for print_str in all_print_strs %}
+			<li> {{print_str}} </li>
+		{% endfor %}
+	</ul>
+
 {% endif %}
-<ul>
-	<legend> There are some good condis near you! </legend>
-	{% for print_str in all_print_strs %}
-		<li> {{print_str}} </li>
-	{% endfor %}
-</ul>
 {% endblock content %}
