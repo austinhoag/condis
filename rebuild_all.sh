@@ -1,6 +1,5 @@
-docker rm -f $(docker ps -aq)
+docker rm -f $(docker ps -a | grep "flaskcondis" | awk '{print $1}')
 
-cd flask 
 docker build -f ./flask.Dockerfile -t flaskcondis:latest .
 
 docker network rm condis-dev

@@ -6,6 +6,8 @@ WORKDIR /app
 
 RUN pip install -r requirements.txt
 
-COPY . /app
+COPY run.py /app
 
-CMD celery worker -A celery_worker.cel --loglevel=info	
+COPY condis /app
+
+CMD python run.py

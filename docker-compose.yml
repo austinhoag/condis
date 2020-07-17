@@ -9,19 +9,19 @@ services:
     env_file: .env
     image: flaskcondis:latest
     volumes:
-      - ./flask:/app
+      - .:/app
       - /var/run/docker.sock:/var/run/docker.sock
     ports:
       - '5000:5000'
-  # worker:
-  #   image: flaskcondis:latest
-  #   volumes:
-  #     - ./flask:/app
-  #   depends_on:
-  #     - redis
-  #   env_file:
-  #     - ".env"
-  #   command: "celery worker -A celery_worker.cel --loglevel=info "
+  worker:
+    image: flaskcondis:latest
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+    env_file:
+      - ".env"
+    command: "celery worker -A celery_worker.cel --loglevel=info "
   # scheduler:
   #   image: flaskcondis:latest
   #   volumes:

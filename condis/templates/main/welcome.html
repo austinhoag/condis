@@ -1,0 +1,13 @@
+{% extends "layout.html" %}
+	{% block content %}
+	<h1 align="center" class="mb-2">Welcome to Condis! </h1>
+	<p id='larger' align="center"> We make robots check the forecast so that you don't have to </p>
+	<hr class='class-1'>
+	<h5> We provide two options: </h5>
+	<hr>
+	<ol>
+		<li id='larger' class='mb-2 '><a href="{{url_for('main.setup')}}">One-time search: </a> Search the forecast for specific conditions at a location of your choosing. </li>
+		<li id='larger' class='mb-2'><a href="{{url_for('main.setup_recurring')}}">Email notifications: </a> Give us your email, the conditions you want and a location and we will email you when these conditions are met. </li>
+	</ol>
+
+	{% endblock content %}

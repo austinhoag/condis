@@ -1,28 +1,94 @@
 from flask import (Blueprint, 
 	render_template, request, flash,
-	url_for,jsonify)
+	url_for,jsonify,Response,redirect)
 import requests
 import pandas
 from functools import reduce
 from datetime import datetime,timedelta
+import json
 import pandas as pd
 
 import numpy as np
-from .forms import gpsForm, SetupForm
+from .forms import gpsForm, SetupForm, SetupRecurringForm
 from .utils import expand_dataframe, splitme_zip
+from . import tasks 
+
+from condis import db
 
 main = Blueprint('main',__name__)
 
 time_format = '%-I %p' # e.g. "4 AM"
 
 @main.route("/") 
-def base(): 
-	return "home"
+@main.route("/home") 
+def home(): 
+	return render_template('main/welcome.html')
+
+@main.route("/test_celery") 
+def test_celery(): 
+	tasks.send_daily_emails.delay()
+	return "executed task"
+
+@main.route("/add_email") 
+def add_email():
+	db.User().insert1(dict(email='teslaboaters@gmail.com'),
+		skip_duplicates=True)
+	user_results = db.User()
+	print(user_results)
+	return "success"
 
 @main.route("/test_slider",methods=['GET','POST']) 
 def test_slider(): 
 	form = SetupForm()
 	return render_template('main/test_slider.html',form=form)
+
+@main.route("/setup_recurring_form",methods=['GET','POST']) 
+def setup_recurring(): 
+	# Add an entry to the GridLocation db table based on someone's input location
+	form = SetupRecurringForm(request.form)
+	if request.method == 'POST':
+		if form.validate_on_submit():
+			""" Get form input """
+			email = form.email.data
+			gps_str = form.gps_str.data
+			splitstr = gps_str.split(',')
+			latitude = float(splitstr[0])
+			longitude = float(splitstr[1])
+			""" Make GET request to endpoint to 
+			find the grid id and x and y 
+			"""
+			grid_response = requests.get(url_for('main.find_grid',
+					latitude=latitude,longitude=longitude,_external=True))
+			grid_dict = grid_response.json()
+
+			grid_id = grid_dict['grid_id']
+			grid_x = grid_dict['grid_x']
+			grid_y = grid_dict['grid_y']
+
+			temp_str = form.temp.data
+			humidity_str = form.humidity.data
+			precip_str = form.precip.data
+			min_temp = int(temp_str.split('-')[0].strip())
+			max_temp = int(temp_str.split('-')[1].strip())
+			min_humidity = int(humidity_str.split('-')[0].strip())
+			max_humidity = int(humidity_str.split('-')[1].strip())
+			min_precip = int(precip_str.split('-')[0].strip())
+			max_precip = int(precip_str.split('-')[1].strip())
+			user_insert_dict = dict(email=email)
+			grid_insert_dict = dict(email=email,latitude=latitude,
+				longitude=longitude,grid_id=grid_id,
+				grid_x=grid_x,grid_y=grid_y,temp_min=min_temp,
+				temp_max=max_temp,humidity_min=min_humidity,
+				humidity_max=max_humidity,precip_min=min_precip,
+				precip_max=max_precip)
+			db.User().insert1(user_insert_dict,skip_duplicates=True)
+			db.GridSearchParams().insert1(grid_insert_dict,skip_duplicates=True)
+			flash("Success! You will receive an email when the forecast meets your conditions","success")
+			return redirect(url_for('main.home'))
+		else:
+			print("form not validated")
+			print(form.errors)
+	return render_template('main/setup_recurring_form.html',form=form)
 
 @main.route("/setup_form",methods=['GET','POST']) 
 def setup(): 
@@ -54,8 +120,8 @@ def setup():
 		max_precip = int(precip_str.split('-')[1].strip())
 
 		# Make GET request to weather API
-		print('https://api.weather.gov/gridpoints/{}/{},{}'.format(
-			grid_id,grid_x,grid_y))
+		# print('https://api.weather.gov/gridpoints/{}/{},{}'.format(
+		# 	grid_id,grid_x,grid_y))
 		response = requests.get('https://api.weather.gov/gridpoints/{}/{},{}'.format(
 			grid_id,grid_x,grid_y))
 		# Convert response to python dict
@@ -76,6 +142,7 @@ def setup():
 			else:
 				n_hours = int(str(x).split('PT')[-1].split('H')[0])
 			return n_hours
+
 		def init_temp_df():
 			temp_lists=temp_dicts['values']
 			df_temp=pd.DataFrame(temp_lists)
@@ -135,12 +202,14 @@ def setup():
 		good_condis_mask = (temp_mask) & (hum_mask) & (precip_mask)
 		df_good_condis = df_final[good_condis_mask]
 		if len(df_good_condis) == 0:
-			return render_template('main/condis_results.html',no_results=True)
+			return render_template('main/condis_results.html',
+				gps_str=gps_str,temp_str=temp_str,humidity_str=humidity_str,
+				precip_str=precip_str,no_results=True)
 		# Split up into groups by neighboring hours
 		groups=splitme_zip(np.array(df_good_condis.index),d=1)
 		all_print_strs = []
 		for group in groups:
-			print(group)
+			# print(group)
 			mask = df_good_condis.index.isin(group)
 			group_df = df_good_condis[mask]
 			if len(group) > 1:
@@ -161,6 +230,7 @@ def setup():
 				time = timestamp.time()
 				print_str = f"{date} at {time.strftime(time_format)}"
 			all_print_strs.append(print_str)
+
 		return render_template('main/condis_results.html',
 			gps_str=gps_str,temp_str=temp_str,humidity_str=humidity_str,
 			precip_str=precip_str,all_print_strs=all_print_strs,no_results=False)
@@ -187,101 +257,3 @@ def find_grid(latitude,longitude):
 	# print(grid_id,grid_x,grid_y)
 	return jsonify(d)
 	# return (grid_id,grid_x,grid_y)
-
-# @main.route('/bokeh')
-# def bokeh():
-
-#     # init a basic bar chart:
-#     # http://bokeh.pydata.org/en/latest/docs/user_guide/plotting.html#bars
-#     fig = figure(plot_width=600, plot_height=600)
-#     fig.vbar(
-#         x=[1, 2, 3, 4],
-#         width=0.5,
-#         bottom=0,
-#         top=[1.7, 2.2, 4.6, 3.9],
-#         color='navy'
-#     )
-
-#     # grab the static resources
-#     js_resources = INLINE.render_js()
-#     css_resources = INLINE.render_css()
-
-#     # render template
-#     script, div = components(fig)
-#     html = render_template(
-#         'index.html',
-#         plot_script=script,
-#         plot_div=div,
-#         js_resources=js_resources,
-#         css_resources=css_resources,
-#     )
-#     return encode_utf8(html)
-
-# @main.route('/bokeh2')
-# def bokeh2():
-
-#     # Set up data
-# 	N = 200
-# 	x = np.linspace(0, 4*np.pi, N)
-# 	y = np.sin(x)
-# 	source = ColumnDataSource(data=dict(x=x, y=y))
-
-
-# 	# Set up plot
-# 	plot = figure(plot_height=400, plot_width=400, title="my sine wave",
-# 	              tools="crosshair,pan,reset,save,wheel_zoom",
-# 	              x_range=[0, 4*np.pi], y_range=[-2.5, 2.5])
-
-# 	plot.line('x', 'y', source=source, line_width=3, line_alpha=0.6)
-
-
-# 	# Set up widgets
-# 	text = TextInput(title="title", value='my sine wave')
-# 	offset = Slider(title="offset", value=0.0, start=-5.0, end=5.0, step=0.1)
-# 	amplitude = Slider(title="amplitude", value=1.0, start=-5.0, end=5.0, step=0.1)
-# 	phase = Slider(title="phase", value=0.0, start=0.0, end=2*np.pi)
-# 	freq = Slider(title="frequency", value=1.0, start=0.1, end=5.1, step=0.1)
-
-
-# 	# Set up callbacks
-# 	def update_title(attrname, old, new):
-# 	    plot.title.text = text.value
-
-# 	text.on_change('value', update_title)
-
-# 	def update_data(attrname, old, new):
-
-# 	    # Get the current slider values
-# 	    a = amplitude.value
-# 	    b = offset.value
-# 	    w = phase.value
-# 	    k = freq.value
-
-# 	    # Generate the new curve
-# 	    x = np.linspace(0, 4*np.pi, N)
-# 	    y = a*np.sin(k*x + w) + b
-
-# 	    source.data = dict(x=x, y=y)
-
-# 	for w in [offset, amplitude, phase, freq]:
-# 	    w.on_change('value', update_data)
-
-
-# 	# Set up layouts and add to document
-# 	inputs = column(text, offset, amplitude, phase, freq)
-
-# 	curdoc().add_root(row(inputs, plot, width=800))
-# 	curdoc().title = "Sliders"
-# 	# render template
-# 	script, div = components(plot)
-# 	# grab the static resources
-# 	js_resources = INLINE.render_js()
-# 	css_resources = INLINE.render_css()
-# 	html = render_template(
-# 	    'index.html',
-# 	    plot_script=script,
-# 	    plot_div=div,
-# 	    js_resources=js_resources,
-# 	    css_resources=css_resources,
-# 	)
-# 	return encode_utf8(html)

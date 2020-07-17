@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<!-- Required meta tags -->
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<!-- Bootstrap CSS -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.css"  crossorigin="anonymous">
+
+		<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+		<link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+		<link href="http://fonts.googleapis.com/css?family=Corben:bold" rel="stylesheet" type="text/css">
+		<link href="http://fonts.googleapis.com/css?family=Nobile" rel="stylesheet" type="text/css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+		<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+
+
+		<title>Condis</title>
+</head>
+<body>
+		<header class="site-header">
+			<nav class="navbar bg-steel fixed-top">
+				<div class="dropdown">
+				  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:18px;">
+					<i class="fa fa-navicon" style="font-size:24px;"></i>
+				  </button>
+				  <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+				  	<a class="dropdown-item" href="{{url_for('main.home')}}">Home</a>
+					<a class="dropdown-item" href="{{url_for('main.setup')}}">One-time search</a>
+					<a class="dropdown-item" href="{{url_for('main.setup_recurring')}}">Email notifications</a>
+				  </div>
+				</div>
+				 <!-- <div class="container">
+				
+					<a class="navbar-brand mr-4" href="{{url_for('main.home')}}">Home</a>
+					<a class="navbar-brand mr-4" href="{{url_for('main.setup')}}">One-time search</a>
+					<a class="navbar-brand mr-4" href="{{url_for('main.setup_recurring')}}">Email notifications</a>
+					<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+						<span class="navbar-toggler-icon"></span>
+					</button>
+					<div class="collapse navbar-collapse" id="navbarToggle">
+
+					</div>
+				</div> -->
+			</nav>
+		</header>
+		<main role="main" class="container">
+					  {% with messages = get_flashed_messages(with_categories=true) %}
+						{% if messages %}
+						  {% for category, message in messages %}
+							<div class="alert alert-{{ category }}">
+							  {{ message }}
+							</div>
+						  {% endfor %}
+						{% endif %}
+					  {% endwith %}
+					{% block content %}{% endblock %}
+		</main>
+	
+
+		<!-- Optional JavaScript -->
+		<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+</body>
+</html>
