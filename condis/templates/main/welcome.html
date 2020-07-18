@@ -3,11 +3,23 @@
 	<h1 align="center" class="mb-2">Welcome to Condis! </h1>
 	<p id='larger' align="center"> We make robots check the forecast so that you don't have to </p>
 	<hr class='class-1'>
-	<h5> We provide two options: </h5>
+	<h5 align="center"> Choose from the following two options: </h5>
 	<hr>
-	<ol>
-		<li id='larger' class='mb-2 '><a href="{{url_for('main.setup')}}">One-time search: </a> Search the forecast for specific conditions at a location of your choosing. </li>
-		<li id='larger' class='mb-2'><a href="{{url_for('main.setup_recurring')}}">Email notifications: </a> Give us your email, the conditions you want and a location and we will email you when these conditions are met. </li>
-	</ol>
+	<div class="container">
+	<div class="row justify-content-center">
+		<div class="col-5 content-section">
+		  <a href="{{url_for('main.setup')}}">Search now: </a> Search the weather forecast for a set of conditions that you specify.
+		</div>
+		<div class="col-1">
+		 
+		</div>
 
+		<div class="col-5 content-section">
+		  <a href="{{url_for('main.setup_recurring')}}">Email notifications: </a> Set up a recurring search for your specified conditions, and we will email you the minute they are found.
+		</div>
+	</div>
+	</div>
+
+
+  
 	{% endblock content %}
