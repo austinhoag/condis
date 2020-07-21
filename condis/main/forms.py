@@ -72,3 +72,26 @@ class SetupRecurringForm(FlaskForm):
 		except:
 			raise ValidationError('Incorrect format. Try again.')
 	
+class EntryForm(FlaskForm):
+	""" The form for requesting a recurring email based on location """
+	gps_str = StringField('Latitude,Longitude (e.g. 36.131,-115.425):',validators=[InputRequired()])
+	temp = StringField(Markup('Temperature (&deg;F)'),id='temp-field')
+	humidity = StringField('Relative Humidity (%)',id='humidity-field')
+	precip = StringField('Percent chance of precipitation (%)',id='precip-field')
+	email_check = BooleanField("Check to also receive an email whenever these conditions are met.")
+	email = StringField('Your email:',validators=[Email()])
+	submit = SubmitField("Search now")
+
+	def validate_gps_str(self,gps_str):
+		try:
+			splitstr = gps_str.data.split(',')
+		except:
+			raise ValidationError('Incorrect format. Try again.')
+		if len(splitstr) != 2:
+			raise ValidationError('Incorrect format. Acceptable format is latitude,longitude')
+		try:	
+			lat = float(splitstr[0])
+			lon = float(splitstr[1])
+		except:
+			raise ValidationError('Incorrect format. Try again.')
+	

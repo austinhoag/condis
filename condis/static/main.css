@@ -119,6 +119,10 @@ a.article-title:hover {
 font-size: 24px;
 }
 
+#subtitle {
+font-size: 18px;
+}
+
 #temp-range {
   width: 200px;
 }
@@ -236,3 +240,10 @@ p, div, li {
   font: normal normal normal 14px/1 FontAwesome;
   content: "\f142";
 }
+
+.navbar {
+  min-height: 40px;
+}
+
+
+

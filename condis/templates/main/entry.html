@@ -1,0 +1,229 @@
+{% extends "layout.html" %}
+	{% block content %}
+
+	<title>jQuery UI Slider - Range slider</title>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	<script>
+	$( function() {
+		$( "#temp-range" ).slider({
+			range: true,
+			min: 0,
+			max: 100,
+			values: [ 40, 70 ],
+			slide: function( event, ui ) {
+				// On change
+				var min_F = ui.values[ 0 ];
+				var max_F = ui.values[ 1 ];
+				var min_C = ((5/9)*(min_F-32)).toFixed(1);
+				var max_C = ((5/9)*(max_F-32)).toFixed(1);
+				$( "#temp-field" ).val(min_F + " - " + max_F );
+				$( "#temp-field-C" ).val(min_C + " - " + max_C);
+			}
+		});
+		// Initialize
+		var min_F = $( "#temp-range" ).slider( "values", 0 );
+		var max_F = $( "#temp-range" ).slider( "values", 1 );
+		$( "#temp-field" ).val(min_F +
+			" - " + max_F );
+		var min_C = ((5/9)*(min_F-32)).toFixed(1);
+				var max_C = ((5/9)*(max_F-32)).toFixed(1);
+		$( "#temp-field-C" ).val(min_C + " - " + max_C );
+	} );
+	</script>
+
+	<script>
+	$( function() {
+		$( "#humidity-range" ).slider({
+			range: true,
+			min: 0,
+			max: 100,
+			values: [ 0, 40 ],
+			slide: function( event, ui ) {
+				$( "#humidity-field" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+			}
+		});
+		$( "#humidity-field" ).val($( "#humidity-range" ).slider( "values", 0 ) +
+			" - " + $( "#humidity-range" ).slider( "values", 1 ) );
+	} );
+	</script>
+
+	<script>
+	$( function() {
+		$( "#precip-range" ).slider({
+			range: true,
+			min: 0,
+			max: 100,
+			values: [ 0, 30 ],
+			slide: function( event, ui ) {
+				$( "#precip-field" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
+			}
+		});
+		$( "#precip-field" ).val($( "#precip-range" ).slider( "values", 0 ) +
+			" - " + $( "#precip-range" ).slider( "values", 1 ) );
+	} );
+	</script>
+
+	<h1 class="mb-2">Condis <span class='ml-2' id='subtitle'> We make robots check the forecast so that you don't have to </span> </h1> 
+
+	<hr class='class-1'>
+	<div class='row'>
+		<div class='mt-2 col-4'>
+			<h3>How it works:</h3> <p> in the form on the right, provide a location and select criteria for your desired weather conditions using the sliders. When you hit "search now" we take these criteria and filter the 7-day future weather forecast for your area and (almost) instantaneously report back the times that match these criteria. 
+			</br></br>
+			Optional: if you check the box at the bottom of the form and provide us your email address, we will search the forecast every day, once a day using the criteria that you provide us. We will email you when we find conditions that match your criteria. Feel free to use your email for multiple locations -- we will treat each request separately and send you separate emails for each location.
+		</div>
+
+		<div class="col content-section">
+			<h3> Search Form </h3>
+			<hr class='class-2'>
+
+			<form method="POST" action="">
+
+				{{ form.hidden_tag() }}
+
+				<fieldset class="form-group">
+
+				<div class="form-group">
+					{{ form.gps_str.label }}
+					{% if form.gps_str.errors %}
+						{{ form.gps_str(class="form-control form-control-sm is-invalid col-md-3") }}
+						<div class="invalid-feedback">
+							{% for error in form.gps_str.errors %}
+								<span>{{ error }}</span>
+							{% endfor %}
+						</div>
+					{% else %}
+						{{ form.gps_str(class="form-control form-control-sm col-md-3") }} 
+					{% endif %}
+				</div>
+
+				<hr class='class-2'>
+
+				<div>
+					<!-- <label for="temp-field">Temperature (&deg;F):</label>
+					<input type="text" name='temp' id="temp-field" readonly style="font-weight:bold;"> -->
+					<div class="row">
+						<div class="col">
+							{{ form.temp.label }}
+							{% if form.temp.errors %}
+								{{ form.temp(readonly=true, class="form-control form-control-sm is-invalid col-md-7 mb-2") }}
+								<div class="invalid-feedback">
+									{% for error in form.temp.errors %}
+										<span>{{ error }}</span>
+									{% endfor %}
+								</div>
+							{% else %}
+								{{ form.temp(readonly=true, class="form-control form-control-sm col-md-7 mb-2 ") }} 
+							{% endif %}
+						</div>
+						<div class="col">
+							<label for="temp-field-C">Temperature (&deg;C)</label></br>
+							<input readonly class="form-control form-control-sm col-md-7" id="temp-field-C" name="temp-C" type="text"> 
+						</div>
+						<div class="col">
+						</div>
+					</div>
+					<div class='my-slider' id="temp-range"></div>
+				</div>
+
+				<hr class='class-2'>
+
+				<div>
+					<!-- <label for="temp-field">Temperature (&deg;F):</label>
+					<input type="text" name='temp' id="temp-field" readonly style="font-weight:bold;"> -->
+					<div class="row">
+						<div class="col">
+						{{ form.humidity.label }}
+						{% if form.humidity.errors %}
+							{{ form.humidity(readonly=true, class="form-control form-control-sm is-invalid col-md-3 mb-2 ") }}
+							<div class="invalid-feedback">
+								{% for error in form.humidity.errors %}
+									<span>{{ error }}</span>
+								{% endfor %}
+							</div>
+						{% else %}
+							{{ form.humidity(readonly=true, class="form-control form-control-sm col-md-7 mb-2 ") }}
+						{% endif %}
+						</div>
+						<div class="col">
+						</div>
+						<div class="col">
+						</div>
+					</div>
+					<div class='my-slider' id="humidity-range"></div>
+				</div>
+
+				<hr class='class-2'>
+
+				<div>
+					<!-- <label for="temp-field">Temperature (&deg;F):</label>
+					<input type="text" name='temp' id="temp-field" readonly style="font-weight:bold;"> -->
+					<div class="row">
+						<div class="col">
+						{{ form.precip.label }}
+						{% if form.precip.errors %}
+							{{ form.precip(readonly=true, class="form-control form-control-sm is-invalid col-md-7 mb-2") }}
+							<div class="invalid-feedback">
+								{% for error in form.precip.errors %}
+									<span>{{ error }}</span>
+								{% endfor %}
+							</div>
+						{% else %}
+							{{ form.precip(readonly=true, class="form-control form-control-sm col-md-7 mb-2 ") }}
+						{% endif %}
+						</div>
+						<div class="col">
+						</div>
+						<div class="col">
+						</div>
+					</div>
+					<div class="my-slider" id="precip-range"></div>
+				</div>
+				
+				<hr class='class-2'>
+				
+				<div class='form-check mb-2'>
+					{{ form.email_check(class="form-check-input", onchange="togglefield(this)" ) }}
+					{{ form.email_check.label(class="form-check-label") }}
+				</div>
+
+				<div class='form-group'>
+					<div id="email_field" style="display: none">
+						{{ form.email.label }}
+						{% if form.email.errors %}
+							{{ form.email(class="form-control form-control-sm is-invalid col-md-3") }}
+							<div class="invalid-feedback">
+								{% for error in form.email.errors %}
+									<span>{{ error }}</span>
+								{% endfor %}
+							</div>
+						{% else %}
+							{{ form.email(class="form-control form-control-sm col-md-3 ") }}
+						{% endif %}
+					</div>
+				</div>
+
+				<hr class='class-2'>
+				<div class="form-group">
+					{{ form.submit(class="btn btn-info btn-lg mt-2") }}
+				</div>
+			</fieldset>
+		</form>
+	</div> <!-- End of second col div-->
+</div> <!-- End of row div-->
+
+<script>
+function togglefield(checkboxElem) {
+	var x = document.getElementById("email_field");
+	if (checkboxElem.checked) {
+		x.style.display = "block";
+	} else {
+		x.style.display = "none";
+		}
+	}
+</script>
+
+
+{% endblock content %}

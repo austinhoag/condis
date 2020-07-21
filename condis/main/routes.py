@@ -9,7 +9,7 @@ import json
 import pandas as pd
 
 import numpy as np
-from .forms import gpsForm, SetupForm, SetupRecurringForm
+from .forms import gpsForm, SetupForm, SetupRecurringForm, EntryForm
 from .utils import expand_dataframe, splitme_zip
 from . import tasks 
 
@@ -22,7 +22,8 @@ time_format = '%-I %p' # e.g. "4 AM"
 @main.route("/") 
 @main.route("/home") 
 def home(): 
-	return render_template('main/welcome.html')
+	form = EntryForm()
+	return render_template('main/entry.html',form=form)
 
 @main.route("/test_celery") 
 def test_celery(): 
