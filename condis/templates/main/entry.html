@@ -337,6 +337,19 @@
 	</div> <!-- End of second col div-->
 </div> <!-- End of row div-->
 
+
+<script>
+	window.onload = function() {
+	var checkboxElem = document.getElementById("email_check")
+	var x = document.getElementById("email_field");
+	if (checkboxElem.checked) {
+		x.style.display = "block";
+	} else {
+		x.style.display = "none";
+		}
+	}
+</script>
+
 <script>
 function togglefield(checkboxElem) {
 	var x = document.getElementById("email_field");
