@@ -1,6 +1,7 @@
 from condis import cel, db, smtp_connect
 from .utils import hit_grid_api
 from email.message import EmailMessage
+from datetime import datetime
 
 
 @cel.task
@@ -9,17 +10,26 @@ def send_daily_emails():
 	entry do the lookup and if there are results, send a summary 
 	email to the user """
 	grid_db_contents = db.GridSearchParams() 
+	print()
+	print(len(grid_db_contents))
 	for grid_param_dict in grid_db_contents:
+		print(grid_param_dict)
 		all_print_strs = hit_grid_api(**grid_param_dict)
 		email = grid_param_dict['email']
 		latitude = grid_param_dict['latitude']
 		longitude = grid_param_dict['longitude']
-		temp_min = grid_param_dict['temp_min']
-		temp_max = grid_param_dict['temp_max']
-		humidity_min = grid_param_dict['humidity_min']
-		humidity_max = grid_param_dict['humidity_max']
-		precip_min = grid_param_dict['precip_min']
-		precip_max = grid_param_dict['precip_max']
+		time_min = grid_param_dict['min_time']
+		time_max = grid_param_dict['max_time']
+		time_min_str = datetime.strptime(time_min,'%H').strftime('%-I %p')
+		time_max_str = datetime.strptime(time_max,'%H').strftime('%-I %p')
+		time_str = f"{time_min_str} - {time_max_str}"
+		temp_min = grid_param_dict['min_temp']
+		temp_max = grid_param_dict['max_temp']
+		
+		humidity_min = grid_param_dict['min_humidity']
+		humidity_max = grid_param_dict['max_humidity']
+		precip_min = grid_param_dict['min_precip']
+		precip_max = grid_param_dict['max_precip']
 		if len(all_print_strs) == 0:
 			print("No good condis found")
 			subject = "Condis: No conditions yet found."
@@ -33,9 +43,10 @@ def send_daily_emails():
 					"that meet the criteria you set at coordinates:\n"
 					f"\t{latitude},{longitude}.\n\n"
 					f"The conditions you requested were:\n"
-					f"\tTemperature: {temp_min}-{temp_max}\n"
-					f"\tRelative Humidity: {humidity_min}-{humidity_max}\n"
-					f"\tPrecipitation probability: {precip_min}-{precip_max}\n\n"
+					f"\tTime of day: {time_str}\n"
+					f"\tTemperature: {temp_min}-{temp_max} deg. F\n"
+					f"\tRelative Humidity: {humidity_min}-{humidity_max} percent \n"
+					f"\tPrecipitation probability: {precip_min}-{precip_max} percent\n\n"
 					 "Here are the times that meet those criteria:\n\n")
 			for print_str in all_print_strs:
 				body+=print_str 

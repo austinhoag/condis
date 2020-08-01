@@ -8,20 +8,25 @@ time_format = '%-I %p' # e.g. "4 AM"
 def hit_grid_api(**grid_params):
     """ Make GET request to weather API gridpoints endpoint
     To retrieve times within the grid_params"""
+    print(grid_params)
     grid_id = grid_params['grid_id']
     grid_x  = grid_params['grid_x']
     grid_y  = grid_params['grid_y']
-    min_temp = grid_params['temp_min']
-    max_temp = grid_params['temp_max']
-    min_humidity = grid_params['humidity_min']
-    max_humidity = grid_params['humidity_max']
-    min_precip = grid_params['precip_min']
-    max_precip = grid_params['precip_max']
-    print(f'https://api.weather.gov/gridpoints/{grid_id}/{grid_x},{grid_y}')
+    min_temp = grid_params['min_temp']
+    max_temp = grid_params['max_temp']
+    min_humidity = grid_params['min_humidity']
+    max_humidity = grid_params['max_humidity']
+    min_precip = grid_params['min_precip']
+    max_precip = grid_params['max_precip']
+    min_time = grid_params['min_time']
+    max_time = grid_params['max_time']
     response = requests.get(f'https://api.weather.gov/gridpoints/{grid_id}/{grid_x},{grid_y}')
+    # Handle bad responses from the weather API
+    if response.status_code != 200:
+        return response.status_code
     # Convert response to python dict
     j=response.json()
-    # print(j)
+    print(j)
     # Get all properties and then extract the ones I will use
     properties=j['properties']
     temp_dicts=properties['temperature']
@@ -32,11 +37,15 @@ def hit_grid_api(**grid_params):
         duration_str = str(x).split('P')[-1]
         if "D" in duration_str:
             n_days = int(duration_str[0])
-            n_hours = int(duration_str.split("T")[-1].split('H')[0])
+            if 'H' in duration_str:
+                n_hours = int(duration_str.split("T")[-1].split('H')[0])
+            else:
+                n_hours = 0
             n_hours += n_days*24
         else:
             n_hours = int(str(x).split('PT')[-1].split('H')[0])
         return n_hours
+
     def init_temp_df():
         temp_lists=temp_dicts['values']
         df_temp=pd.DataFrame(temp_lists)
@@ -93,7 +102,8 @@ def hit_grid_api(**grid_params):
     hum_mask = (df_final['relativeHumidity'] >= min_humidity) & (df_final['relativeHumidity'] <= max_humidity) 
     precip_mask = (df_final['probabilityOfPrecipitation'] >= min_precip) & \
         (df_final['probabilityOfPrecipitation'] <= max_precip)
-    good_condis_mask = (temp_mask) & (hum_mask) & (precip_mask)
+    time_mask = df_final['timestamp'].dt.strftime('%H').between(min_time,max_time)
+    good_condis_mask = (temp_mask) & (hum_mask) & (precip_mask) & (time_mask)
     df_good_condis = df_final[good_condis_mask]
     if len(df_good_condis) == 0:
         return []
@@ -101,25 +111,30 @@ def hit_grid_api(**grid_params):
     groups=splitme_zip(np.array(df_good_condis.index),d=1)
     all_print_strs = []
     for group in groups:
+        # print(group)
         mask = df_good_condis.index.isin(group)
         group_df = df_good_condis[mask]
         if len(group) > 1:
             first_timestamp = group_df['timestamp'].iloc[0]
-            first_date = first_timestamp.date()
+            first_weekday = first_timestamp.day_name()
+            first_date = first_timestamp.date().strftime('%m/%d/%Y')
             first_time = first_timestamp.time()
             last_timestamp = group_df['timestamp'].iloc[-1]
-            last_date = last_timestamp.date()
+            last_weekday = last_timestamp.day_name()
+            last_date = last_timestamp.date().strftime('%m/%d/%Y')
             last_time = last_timestamp.time()
 
             if first_date == last_date:
-                print_str = f"{first_date}, from {first_time.strftime(time_format)} to {last_time.strftime(time_format)} "
+                print_str = f"{first_weekday}, {first_date}, from {first_time.strftime(time_format)} to {last_time.strftime(time_format)} "
             else:
-                print_str = f"From {first_time.strftime(time_format)} on {first_date} to {last_time.strftime(time_format)} on {last_date} "
+                print_str = (f"From {first_time.strftime(time_format)} on {first_weekday},"
+                            " {first_date} to {last_time.strftime(time_format)} on {last_weekday}, {last_date} ")
         else:
             timestamp = group_df['timestamp'].iloc[0]
-            date = timestamp.date()
+            weekday = timestamp.day_name()
+            date = timestamp.date().strftime('%m/%d/%Y')
             time = timestamp.time()
-            print_str = f"{date} at {time.strftime(time_format)}"
+            print_str = f"{weekday}, {date} at {time.strftime(time_format)}"
         all_print_strs.append(print_str)
     return all_print_strs
 

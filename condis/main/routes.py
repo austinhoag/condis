@@ -1,17 +1,23 @@
 from flask import (Blueprint, 
 	render_template, request, flash,
-	url_for,jsonify,Response,redirect)
+	url_for,jsonify,Response,redirect,
+	abort)
 import requests
 import pandas
 from functools import reduce
 from datetime import datetime,timedelta
 import json
 import pandas as pd
-
+from geopy.geocoders import Nominatim
 import numpy as np
+
+
 from .forms import gpsForm, SetupForm, SetupRecurringForm, EntryForm
-from .utils import expand_dataframe, splitme_zip
+from .utils import expand_dataframe, splitme_zip, hit_grid_api
 from . import tasks 
+from .tables import create_dynamic_calendar_table
+
+
 
 from condis import db
 
@@ -19,16 +25,129 @@ main = Blueprint('main',__name__)
 
 time_format = '%-I %p' # e.g. "4 AM"
 
-@main.route("/") 
-@main.route("/home") 
+geolocator = Nominatim(user_agent="my-app")
+
+@main.route("/",methods=['GET','POST']) 
 def home(): 
 	form = EntryForm()
+	# form.gps_str.data = '41.744, -74.197'
+
+	if request.method == 'POST':
+		if form.validate_on_submit():
+			submit_keys = [x for x in form._fields.keys() if 'submit' in x]
+			no_results=True
+			""" Get form input """
+			gps_str = form.gps_str.data
+			splitstr = gps_str.split(',')
+			latitude = float(splitstr[0])
+			longitude = float(splitstr[1])
+			""" Make GET request to endpoint to 
+			find the grid id and x and y 
+			"""
+			grid_response = requests.get(url_for('main.find_grid',
+					latitude=latitude,longitude=longitude,_external=True))
+			grid_dict = grid_response.json()
+			grid_id = grid_dict['grid_id']
+			grid_x = grid_dict['grid_x']
+			grid_y = grid_dict['grid_y']
+			time_str = form.time.data
+			split_timestr = time_str.split('-')
+			min_time_dt = datetime.strptime(split_timestr[0].strip(),'%I %p')
+			min_time = min_time_dt.strftime('%H')
+			max_time_dt = datetime.strptime(split_timestr[1].strip(),'%I %p')
+			max_time = max_time_dt.strftime('%H')
+			
+			if max_time == '00':
+				max_time = '24'
+
+			temp_str = form.temp.data
+			humidity_str = form.humidity.data
+			precip_str = form.precip.data
+			min_temp = int(temp_str.split('-')[0].strip())
+			max_temp = int(temp_str.split('-')[1].strip())
+			min_humidity = int(humidity_str.split('-')[0].strip())
+			max_humidity = int(humidity_str.split('-')[1].strip())
+			min_precip = int(precip_str.split('-')[0].strip())
+			max_precip = int(precip_str.split('-')[1].strip())
+
+			grid_params = {
+				'grid_id': grid_id,
+				'grid_x': grid_x,
+				'grid_y': grid_y,
+				'min_temp': min_temp,
+				'max_temp': max_temp,
+				'min_humidity': min_humidity,
+				'max_humidity': max_humidity,
+				'min_precip': min_precip,
+				'max_precip': max_precip,
+				'min_time': min_time,
+				'max_time': max_time,
+			}
+			all_print_strs = hit_grid_api(**grid_params)
+			if type(all_print_strs) == int: # Then we got a bad status code back
+				abort(503) # redirects to the 503 error page
+			if len(all_print_strs) > 0:
+				no_results = False
+			email_check = form.email_check.data
+			if email_check == True:
+				email = form.email.data
+				user_insert_dict = dict(email=email)
+				grid_insert_dict = dict(
+					email=email,latitude=latitude,
+					longitude=longitude,min_time=min_time,max_time=max_time,
+					grid_id=grid_id,grid_x=grid_x,grid_y=grid_y,
+					min_temp=min_temp,max_temp=max_temp,
+					min_humidity=min_humidity,max_humidity=max_humidity,
+					min_precip=min_precip,max_precip=max_precip
+					)
+				db.User().insert1(user_insert_dict,skip_duplicates=True)
+				db.GridSearchParams().insert1(grid_insert_dict,skip_duplicates=True)
+				flash("You will receive an email when the forecast meets your conditions","success")
+
+			return render_template('main/condis_results.html',
+				gps_str=gps_str,time_str=time_str,temp_str=temp_str,
+				humidity_str=humidity_str,precip_str=precip_str,
+				all_print_strs=all_print_strs,no_results=no_results)
+
+			
+			return redirect(url_for('main.home'))
+		else:
+			print("form not validated")
+			print(form.errors)
+	form.address.data = 'Red Rock Canyon, NV, USA'
 	return render_template('main/entry.html',form=form)
+
+@main.route('/getmethod/<jsdata>')
+def get_javascript_data(jsdata):
+	print("in /getmethod")
+	print(jsdata)
+	return "Test complete"
+
+@main.route('/resolveAddress/<path:address>')
+def resolveAddress(address):
+	# print("in /resolveAddress")
+	# print(address)
+	location = geolocator.geocode(address)
+	try:
+		latitude = location.latitude
+		longitude = location.longitude
+	except:
+		return ""
+	# print(latitude,longitude)
+	gps_str = f'{latitude:.5f},{longitude:.5f}'
+	return gps_str
 
 @main.route("/test_celery") 
 def test_celery(): 
 	tasks.send_daily_emails.delay()
 	return "executed task"
+
+@main.route("/test_calendar") 
+def test_calendar(): 
+	d = [{'day_1':'7/10/2020','day_2':'7/11/2020'}]
+	table = create_dynamic_calendar_table(final_dict_list)
+	return render_template('main/test_calendar.html',table=table)
+
 
 @main.route("/add_email") 
 def add_email():

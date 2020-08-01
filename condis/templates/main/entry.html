@@ -11,7 +11,7 @@
 			range: true,
 			min: 0,
 			max: 100,
-			values: [ 40, 70 ],
+			values: [ 40, 90 ],
 			slide: function( event, ui ) {
 				// On change
 				var min_F = ui.values[ 0 ];
@@ -39,7 +39,7 @@
 			range: true,
 			min: 0,
 			max: 100,
-			values: [ 0, 40 ],
+			values: [ 0, 80 ],
 			slide: function( event, ui ) {
 				$( "#humidity-field" ).val(ui.values[ 0 ] + " - " + ui.values[ 1 ] );
 			}
@@ -65,14 +65,94 @@
 	} );
 	</script>
 
+	<script>
+	$( function() {
+		$( "#time-range" ).slider({
+			range: true,
+			min: 0,
+			max: 24,
+			values: [ 7, 18 ],
+			slide: function( event, ui ) {
+				var time_min = ui.values[0]
+				var time_max = ui.values[1]
+
+				if (time_min < 12) {
+					var tod_min = 'AM'
+				}
+				else {
+					var time_min = time_min-12
+					var	tod_min = 'PM'
+				}
+
+				if (time_min == 0) {
+					var time_min = 12
+				}
+
+				if (time_max < 12) {
+					var tod_max = 'AM'
+				}
+				else {
+					var time_max = time_max-12
+					if (time_max == 12){
+						tod_max = 'AM'
+					}
+					else {
+						var	tod_max = 'PM'
+					}
+				}
+
+				if (time_max == 0) {
+					var time_max = 12
+				}
+
+
+				$( "#time-field" ).val(time_min + " " + tod_min + " - " + time_max  + " " + tod_max);
+			}
+		});
+		var time_min = $( "#time-range" ).slider( "values", 0 )
+		var time_max = $( "#time-range" ).slider( "values", 1 )
+		
+		if (time_min < 12) {
+			var tod_min = 'AM'
+		}
+		else {
+			var time_min = time_min-12
+			var	tod_min = 'PM'
+		}
+
+		if (time_min == 0) {
+			var time_min = 12
+		}
+
+		if (time_max < 12) {
+			var tod_max = 'AM'
+		}
+		else {
+			var time_max = time_max-12
+			if (time_max == 12){
+				tod_max = 'AM'
+			}
+			else {
+				var	tod_max = 'PM'
+			}
+		}
+
+		if (time_max == 0) {
+			var time_max = 12
+		}
+		$( "#time-field" ).val(time_min + " " + tod_min + " - " + time_max + " " + tod_max);
+	} );
+	</script>
+
 	<h1 class="mb-2">Condis <span class='ml-2' id='subtitle'> We make robots check the forecast so that you don't have to </span> </h1> 
 
 	<hr class='class-1'>
-	<div class='row'>
+
+	<div style="padding-right: 15px" class='row'>
 		<div class='mt-2 col-4'>
-			<h3>How it works:</h3> <p> in the form on the right, provide a location and select criteria for your desired weather conditions using the sliders. When you hit "search now" we take these criteria and filter the 7-day future weather forecast for your area and (almost) instantaneously report back the times that match these criteria. 
+			<h3>How it works:</h3> <p> Provide a location and select ranges for your desired weather conditions. When you hit "search now" we take these criteria and filter the 7-day future weather forecast for your area and (almost) instantaneously report back the times that match these criteria. 
 			</br></br>
-			Optional: if you check the box at the bottom of the form and provide us your email address, we will search the forecast every day, once a day using the criteria that you provide us. We will email you when we find conditions that match your criteria. Feel free to use your email for multiple locations -- we will treat each request separately and send you separate emails for each location.
+			Optional: if you check the box at the bottom of the form and provide us your email address, we will search the forecast every day, once a day using the criteria that you provide in this form. We will email you when we find conditions that match your criteria.
 		</div>
 
 		<div class="col content-section">
@@ -85,25 +165,68 @@
 
 				<fieldset class="form-group">
 
-				<div class="form-group">
-					{{ form.gps_str.label }}
-					{% if form.gps_str.errors %}
-						{{ form.gps_str(class="form-control form-control-sm is-invalid col-md-3") }}
-						<div class="invalid-feedback">
-							{% for error in form.gps_str.errors %}
-								<span>{{ error }}</span>
-							{% endfor %}
+				<div id='gps-div' class="form-group">
+					<div class="row">
+						<div class="col">
+							{{ form.gps_str.label }}
+							{% if form.gps_str.errors %}
+								{{ form.gps_str(class="form-control form-control-sm is-invalid col") }}
+								<div class="invalid-feedback">
+									{% for error in form.gps_str.errors %}
+										<span>{{ error }}</span>
+									{% endfor %}
+								</div>
+							{% else %}
+								{{ form.gps_str(class="form-control form-control-sm col-md") }} 
+							{% endif %}
 						</div>
-					{% else %}
-						{{ form.gps_str(class="form-control form-control-sm col-md-3") }} 
-					{% endif %}
+						<div class="col-sm-2">
+							<p align="center"> OR use address to find coordinates: </p>
+						</div>
+					<div class="col">
+						{{ form.address.label }}
+							{% if form.address.errors %}
+								{{ form.address(class="form-control form-control-sm is-invalid col-md") }}
+								<div class="invalid-feedback">
+									{% for error in form.address.errors %}
+										<span>{{ error }}</span>
+									{% endfor %}
+								</div>
+							{% else %}
+								{{ form.address(class="form-control form-control-sm col-md") }} 
+							{% endif %}
+						<button type="button" class="mt-2 btn btn-sm btn-primary" onclick="ajaxget()">Click to find coordinates</button>
+					</div>
 				</div>
 
 				<hr class='class-2'>
+				
+				<div id='time-div'>
+					<div class="row">
+						<div class="col">
+						{{ form.time.label }}
+						{% if form.time.errors %}
+							{{ form.time(readonly=true, class="form-control form-control-sm is-invalid col-md-3 mb-2 ") }}
+							<div class="invalid-feedback">
+								{% for error in form.time.errors %}
+									<span>{{ error }}</span>
+								{% endfor %}
+							</div>
+						{% else %}
+							{{ form.time(readonly=true, class="form-control form-control-sm col-md-7 mb-2 ") }}
+						{% endif %}
+						</div>
+						<div class="col">
+						</div>
+						<div class="col">
+						</div>
+					</div>
+					<div class='my-slider' id="time-range"></div>
+				</div> <!-- time div -->
 
-				<div>
-					<!-- <label for="temp-field">Temperature (&deg;F):</label>
-					<input type="text" name='temp' id="temp-field" readonly style="font-weight:bold;"> -->
+				<hr class='class-2'>
+
+				<div id='temp-div'>
 					<div class="row">
 						<div class="col">
 							{{ form.temp.label }}
@@ -126,8 +249,8 @@
 						</div>
 					</div>
 					<div class='my-slider' id="temp-range"></div>
-				</div>
-
+				</div> <!-- temp div -->
+				
 				<hr class='class-2'>
 
 				<div>
@@ -207,7 +330,7 @@
 
 				<hr class='class-2'>
 				<div class="form-group">
-					{{ form.submit(class="btn btn-info btn-lg mt-2") }}
+					{{ form.submit(class="btn btn-primary btn-lg mt-2") }}
 				</div>
 			</fieldset>
 		</form>
@@ -222,6 +345,17 @@ function togglefield(checkboxElem) {
 	} else {
 		x.style.display = "none";
 		}
+	}
+</script>
+
+<script>
+	function ajaxget(key) {
+		var address_elem = document.getElementById('address')
+		var address_str = address_elem.value
+		$.get("/resolveAddress/" + address_str, function(data) {
+		element = document.getElementById("gps_str");
+		element.value = data;
+		})
 	}
 </script>
 

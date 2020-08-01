@@ -1,18 +1,22 @@
 {% extends "layout.html" %}
 {% block content %}
 
-<h3 class="mb-2">Results for:</h3>
+<a style="font-size:22px" href="{{url_for('main.home')}}"><i class='fa fa-angle-double-left' style="font-size:22px"></i> Back to search page</a>
+</br></br>
+
+<h3 class="border-bottom mb-2">Results for:</h3>
 <p> Coordinates: {{gps_str}}</br>
+Time of day: {{time_str}}</br>
 Temp range: {{temp_str}} (&deg;F)</br>
 Relative humidity range: {{humidity_str}} (%)</br>
 Chance precip range: {{precip_str}} (%)
 </p>
 <hr class='class-4'>
 
-{% if no_results %}
+{% if no_results == true %}
 	<p> Sorry, there are no times in the forecast satisfying your search criteria. </p>
 {% else %}
-<h5>Found some good condis! </h5>
+<h5 style="color: #1db525">Found some good conditions! </h5>
 	<ul>
 		{% for print_str in all_print_strs %}
 			<li> {{print_str}} </li>

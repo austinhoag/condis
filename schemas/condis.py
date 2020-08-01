@@ -24,14 +24,16 @@ class GridSearchParams(dj.Lookup):
     -> User
     latitude       : float
     longitude      : float
+    min_time       : varchar(5)
+    max_time       : varchar(5)
     grid_id        : varchar(3)
     grid_x         : smallint unsigned
     grid_y	       : smallint unsigned
-    temp_min       : smallint unsigned
-    temp_max       : smallint unsigned
-    humidity_min   : smallint unsigned
-    humidity_max   : smallint unsigned
-	precip_min     : smallint unsigned
-    precip_max     : smallint unsigned
+    min_temp       : smallint unsigned
+    max_temp       : smallint unsigned
+    min_humidity   : smallint unsigned
+    max_humidity   : smallint unsigned
+	min_precip     : smallint unsigned
+    max_precip     : smallint unsigned
     ---
     """
