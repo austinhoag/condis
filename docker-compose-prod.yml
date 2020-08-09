@@ -1,0 +1,16 @@
+version: "3.4"
+
+services:
+  web:
+    env_file: .prodenv
+    image: flaskcondis:prod
+    command: "gunicorn -w 3 run:app -b 0.0.0.0:5000"
+    volumes:
+      - .:/app 
+    ports:
+      - '8080:5000'
+    restart: unless-stopped
+networks:
+  default:
+    external:
+      name: condis-prod
