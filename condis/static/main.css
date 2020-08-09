@@ -5,8 +5,9 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Corben', Georgia, Times, serif;
+  font-family: 'Fjalla', Georgia, Times, serif;
   color: #444444;
+  font-weight:100;
 }
 
 
@@ -45,6 +46,10 @@ hr.class-5 {
 
 .bg-steel {
   background-color: #616c75;
+}
+
+.bg-alt {
+  background-color: #0275d8;
 }
 
 .site-header .navbar-nav .nav-link {
@@ -227,9 +232,14 @@ li.widespace {
 }
 
 p, div, li {
-    font-family: 'Nobile', Helvetica, Arial, sans-serif;
+    font-family: Georgia, serif;
+    font-size: 18px;
 }
 
+/*p, div, li {
+    font-family: 'Fjalla', Helvetica, Arial, sans-serif;
+}
+*/
 .dropdown-toggle-ellipsis::after {
   display: none;
 }
@@ -246,4 +256,6 @@ p, div, li {
 }
 
 
-
+.sticky-top {
+  top:90px;
+}

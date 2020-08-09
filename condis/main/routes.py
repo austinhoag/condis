@@ -51,15 +51,23 @@ def home():
 			grid_x = grid_dict['grid_x']
 			grid_y = grid_dict['grid_y']
 			time_str = form.time.data
-			split_timestr = time_str.split('-')
-			min_time_dt = datetime.strptime(split_timestr[0].strip(),'%I %p')
-			min_time = min_time_dt.strftime('%H')
-			max_time_dt = datetime.strptime(split_timestr[1].strip(),'%I %p')
-			max_time = max_time_dt.strftime('%H')
-			
-			if max_time == '00':
-				max_time = '24'
-
+			split_timestr = time_str.split('-')			
+			try: 
+				min_time_dt = datetime.strptime(split_timestr[0].strip(),'%I %p')
+				min_time = min_time_dt.strftime('%H')
+			except ValueError:
+				# was 11:59 PM then
+				min_time_dt = datetime.strptime(split_timestr[1].strip(),'%I:%M %p')
+				min_time = '24'
+			try:
+				max_time_dt = datetime.strptime(split_timestr[1].strip(),'%I %p')
+				max_time = max_time_dt.strftime('%H')
+			except ValueError:
+				# was 11:59 PM then
+				max_time_dt = datetime.strptime(split_timestr[1].strip(),'%I:%M %p')
+				max_time = '23:99'
+			print(min_time)
+			print(max_time)
 			temp_str = form.temp.data
 			humidity_str = form.humidity.data
 			precip_str = form.precip.data

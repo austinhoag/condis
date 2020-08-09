@@ -8,7 +8,6 @@ time_format = '%-I %p' # e.g. "4 AM"
 def hit_grid_api(**grid_params):
     """ Make GET request to weather API gridpoints endpoint
     To retrieve times within the grid_params"""
-    print(grid_params)
     grid_id = grid_params['grid_id']
     grid_x  = grid_params['grid_x']
     grid_y  = grid_params['grid_y']
@@ -26,7 +25,6 @@ def hit_grid_api(**grid_params):
         return response.status_code
     # Convert response to python dict
     j=response.json()
-    print(j)
     # Get all properties and then extract the ones I will use
     properties=j['properties']
     temp_dicts=properties['temperature']
@@ -102,7 +100,7 @@ def hit_grid_api(**grid_params):
     hum_mask = (df_final['relativeHumidity'] >= min_humidity) & (df_final['relativeHumidity'] <= max_humidity) 
     precip_mask = (df_final['probabilityOfPrecipitation'] >= min_precip) & \
         (df_final['probabilityOfPrecipitation'] <= max_precip)
-    time_mask = df_final['timestamp'].dt.strftime('%H').between(min_time,max_time)
+    time_mask = df_final['timestamp'].dt.strftime('%H:%M').between(min_time,max_time)
     good_condis_mask = (temp_mask) & (hum_mask) & (precip_mask) & (time_mask)
     df_good_condis = df_final[good_condis_mask]
     if len(df_good_condis) == 0:
@@ -111,30 +109,41 @@ def hit_grid_api(**grid_params):
     groups=splitme_zip(np.array(df_good_condis.index),d=1)
     all_print_strs = []
     for group in groups:
-        # print(group)
         mask = df_good_condis.index.isin(group)
         group_df = df_good_condis[mask]
         if len(group) > 1:
             first_timestamp = group_df['timestamp'].iloc[0]
             first_weekday = first_timestamp.day_name()
             first_date = first_timestamp.date().strftime('%m/%d/%Y')
-            first_time = first_timestamp.time()
+            first_time = first_timestamp.time() 
             last_timestamp = group_df['timestamp'].iloc[-1]
+            last_timestamp += timedelta(hours=1)
             last_weekday = last_timestamp.day_name()
             last_date = last_timestamp.date().strftime('%m/%d/%Y')
-            last_time = last_timestamp.time()
+            last_time = last_timestamp.time() 
 
             if first_date == last_date:
                 print_str = f"{first_weekday}, {first_date}, from {first_time.strftime(time_format)} to {last_time.strftime(time_format)} "
             else:
                 print_str = (f"From {first_time.strftime(time_format)} on {first_weekday},"
-                            " {first_date} to {last_time.strftime(time_format)} on {last_weekday}, {last_date} ")
+                            f" {first_date} to {last_time.strftime(time_format)} on {last_weekday}, {last_date} ")
         else:
+            """ Give as a range from hour X to hour X+1 """
             timestamp = group_df['timestamp'].iloc[0]
-            weekday = timestamp.day_name()
-            date = timestamp.date().strftime('%m/%d/%Y')
-            time = timestamp.time()
-            print_str = f"{weekday}, {date} at {time.strftime(time_format)}"
+            first_weekday = timestamp.day_name()
+            first_date = timestamp.date().strftime('%m/%d/%Y')
+            first_time = timestamp.time()
+
+            next_timestamp = timestamp + timedelta(hours=1)
+            next_weekday = next_timestamp.day_name()
+
+            next_date = next_timestamp.date().strftime('%m/%d/%Y')
+            next_time = next_timestamp.time()        
+            if first_date == next_date:
+                print_str = f"{first_weekday}, {first_date}, from {first_time.strftime(time_format)} to {next_time.strftime(time_format)} "
+            else:
+                print_str = (f"From {first_time.strftime(time_format)} on {first_weekday},"
+                            f" {first_date} to {next_time.strftime(time_format)} on {next_weekday}, {next_date} ")  
         all_print_strs.append(print_str)
     return all_print_strs
 

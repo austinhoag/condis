@@ -76,29 +76,32 @@
 				var time_min = ui.values[0]
 				var time_max = ui.values[1]
 
+				// Handle time_min
 				if (time_min < 12) {
 					var tod_min = 'AM'
 				}
 				else {
 					var time_min = time_min-12
-					var	tod_min = 'PM'
+					if (time_min == 12){
+						time_min = "11:59"
+					}
+						var	tod_min = 'PM'
 				}
 
 				if (time_min == 0) {
 					var time_min = 12
 				}
 
+				// Handle time_max
 				if (time_max < 12) {
 					var tod_max = 'AM'
 				}
 				else {
 					var time_max = time_max-12
 					if (time_max == 12){
-						tod_max = 'AM'
+						time_max = "11:59"
 					}
-					else {
-						var	tod_max = 'PM'
-					}
+					var	tod_max = 'PM'
 				}
 
 				if (time_max == 0) {
@@ -144,19 +147,17 @@
 	} );
 	</script>
 
-	<h1 class="mb-2">Condis <span class='ml-2' id='subtitle'> We make robots check the forecast so that you don't have to </span> </h1> 
-
-	<hr class='class-1'>
-
 	<div style="padding-right: 15px" class='row'>
 		<div class='mt-2 col-4'>
-			<h3>How it works:</h3> <p> Provide a location and select ranges for your desired weather conditions. When you hit "search now" we take these criteria and filter the 7-day future weather forecast for your area and (almost) instantaneously report back the times that match these criteria. 
-			</br></br>
-			Optional: if you check the box at the bottom of the form and provide us your email address, we will search the forecast every day, once a day using the criteria that you provide in this form. We will email you when we find conditions that match your criteria.
+			<div class="sticky-top">
+				<h3 class='border-bottom'><b>How it works:</b></h3> <p> Provide a location and select ranges for your desired weather conditions. When you hit "Search" we take these criteria and filter the 7-day future weather forecast for your area and report back the times that match these criteria. 
+				</br></br>
+				Optional: if you check the box at the bottom of the form and provide us your email address, we will search the forecast daily for your conditions and email you when we find a match.
+			</div>
 		</div>
 
 		<div class="col content-section">
-			<h3> Search Form </h3>
+			<h3> <b>Search Form </b></h3>
 			<hr class='class-2'>
 
 			<form method="POST" action="">
@@ -181,7 +182,7 @@
 							{% endif %}
 						</div>
 						<div class="col-sm-2">
-							<p align="center"> OR use address to find coordinates: </p>
+							<p align="center"> <b>OR</b> use address to find coordinates: </p>
 						</div>
 					<div class="col">
 						{{ form.address.label }}
@@ -206,14 +207,14 @@
 						<div class="col">
 						{{ form.time.label }}
 						{% if form.time.errors %}
-							{{ form.time(readonly=true, class="form-control form-control-sm is-invalid col-md-3 mb-2 ") }}
+							{{ form.time(readonly=true, class="form-control form-control-sm is-invalid col-md-8 mb-2 ") }}
 							<div class="invalid-feedback">
 								{% for error in form.time.errors %}
 									<span>{{ error }}</span>
 								{% endfor %}
 							</div>
 						{% else %}
-							{{ form.time(readonly=true, class="form-control form-control-sm col-md-7 mb-2 ") }}
+							{{ form.time(readonly=true, class="form-control form-control-sm col-md-8 mb-2 ") }}
 						{% endif %}
 						</div>
 						<div class="col">
@@ -231,19 +232,19 @@
 						<div class="col">
 							{{ form.temp.label }}
 							{% if form.temp.errors %}
-								{{ form.temp(readonly=true, class="form-control form-control-sm is-invalid col-md-7 mb-2") }}
+								{{ form.temp(readonly=true, class="form-control form-control-sm is-invalid col-md-8 mb-2") }}
 								<div class="invalid-feedback">
 									{% for error in form.temp.errors %}
 										<span>{{ error }}</span>
 									{% endfor %}
 								</div>
 							{% else %}
-								{{ form.temp(readonly=true, class="form-control form-control-sm col-md-7 mb-2 ") }} 
+								{{ form.temp(readonly=true, class="form-control form-control-sm col-md-8 mb-2 ") }} 
 							{% endif %}
 						</div>
-						<div class="col">
+						<div align="center" class="col">
 							<label for="temp-field-C">Temperature (&deg;C)</label></br>
-							<input readonly class="form-control form-control-sm col-md-7" id="temp-field-C" name="temp-C" type="text"> 
+							<input readonly class="form-control form-control-sm col-md-8" id="temp-field-C" name="temp-C" type="text"> 
 						</div>
 						<div class="col">
 						</div>
@@ -260,14 +261,14 @@
 						<div class="col">
 						{{ form.humidity.label }}
 						{% if form.humidity.errors %}
-							{{ form.humidity(readonly=true, class="form-control form-control-sm is-invalid col-md-3 mb-2 ") }}
+							{{ form.humidity(readonly=true, class="form-control form-control-sm is-invalid col-md-8 mb-2 ") }}
 							<div class="invalid-feedback">
 								{% for error in form.humidity.errors %}
 									<span>{{ error }}</span>
 								{% endfor %}
 							</div>
 						{% else %}
-							{{ form.humidity(readonly=true, class="form-control form-control-sm col-md-7 mb-2 ") }}
+							{{ form.humidity(readonly=true, class="form-control form-control-sm col-md-8 mb-2 ") }}
 						{% endif %}
 						</div>
 						<div class="col">
@@ -287,14 +288,14 @@
 						<div class="col">
 						{{ form.precip.label }}
 						{% if form.precip.errors %}
-							{{ form.precip(readonly=true, class="form-control form-control-sm is-invalid col-md-7 mb-2") }}
+							{{ form.precip(readonly=true, class="form-control form-control-sm is-invalid col-md-8 mb-2") }}
 							<div class="invalid-feedback">
 								{% for error in form.precip.errors %}
 									<span>{{ error }}</span>
 								{% endfor %}
 							</div>
 						{% else %}
-							{{ form.precip(readonly=true, class="form-control form-control-sm col-md-7 mb-2 ") }}
+							{{ form.precip(readonly=true, class="form-control form-control-sm col-md-8 mb-2 ") }}
 						{% endif %}
 						</div>
 						<div class="col">
@@ -316,14 +317,14 @@
 					<div id="email_field" style="display: none">
 						{{ form.email.label }}
 						{% if form.email.errors %}
-							{{ form.email(class="form-control form-control-sm is-invalid col-md-3") }}
+							{{ form.email(class="form-control form-control-sm is-invalid col-md-8") }}
 							<div class="invalid-feedback">
 								{% for error in form.email.errors %}
 									<span>{{ error }}</span>
 								{% endfor %}
 							</div>
 						{% else %}
-							{{ form.email(class="form-control form-control-sm col-md-3 ") }}
+							{{ form.email(class="form-control form-control-sm col-md-8 ") }}
 						{% endif %}
 					</div>
 				</div>
@@ -367,7 +368,12 @@ function togglefield(checkboxElem) {
 		var address_str = address_elem.value
 		$.get("/resolveAddress/" + address_str, function(data) {
 		element = document.getElementById("gps_str");
-		element.value = data;
+		if (data == "") {
+			alert("That address was invalid. Please try again.");
+		}
+		else {
+			element.value = data;
+		}
 		})
 	}
 </script>

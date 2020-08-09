@@ -6,6 +6,7 @@ from wtforms import (StringField, SubmitField, TextAreaField, SelectField,
 from wtforms.validators import DataRequired, Length, InputRequired, ValidationError, Email, Optional 
 from wtforms.widgets import html5, CheckboxInput, ListWidget
 from geopy.geocoders import Nominatim
+from datetime import datetime
 # from wtforms.fields.html5 import DateTimeLocalField
 
 datetimeformat='%Y-%m-%dT%H:%M' # To get form.field.data to work. Does not work with the default (bug)
@@ -17,7 +18,7 @@ class EntryForm(FlaskForm):
 	address = StringField('''Address or Zip Code (e.g. "Red Rock Canyon, NV USA" or "89161 USA"):''',validators=[Optional()])
 
 	temp = StringField(Markup('Temperature (&deg;F)'),id='temp-field')
-	time = StringField(Markup('Time of day'),id='time-field')
+	time = StringField(Markup('Time of day (local time)'),id='time-field')
 
 	humidity = StringField('Relative Humidity (%)',id='humidity-field')
 	precip = StringField('Percent chance of precipitation (%)',id='precip-field')
@@ -25,6 +26,12 @@ class EntryForm(FlaskForm):
 	email = StringField('Your email:',validators=[Optional(),Email()])
 	submit = SubmitField("Search")
 
+	def validate_time(self,time):
+		time_str = time.data
+		time_left, time_right = [x.strip() for x in time_str.split('-')]
+		if time_left == time_right:
+			raise ValidationError('Time range must be at least one hour')
+		
 	def validate_gps_str(self,gps_str):
 		try:
 			splitstr = gps_str.data.split(',')

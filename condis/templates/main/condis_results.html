@@ -16,7 +16,7 @@ Chance precip range: {{precip_str}} (%)
 {% if no_results == true %}
 	<p> Sorry, there are no times in the forecast satisfying your search criteria. </p>
 {% else %}
-<h5 style="color: #1db525">Found some good conditions! </h5>
+<h3 style="color: #1db525">Found some good conditions! </h3>
 	<ul>
 		{% for print_str in all_print_strs %}
 			<li> {{print_str}} </li>
