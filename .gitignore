@@ -2,5 +2,8 @@
 .*py
 .*html
 .env
+.devenv
 .prodenv
+.testenv
 *pyc
+schemas

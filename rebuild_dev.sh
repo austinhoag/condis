@@ -6,4 +6,4 @@ docker network rm condis-dev
 
 docker network create --attachable condis-dev
 
-docker-compose build 
+docker-compose -f docker-compose-dev.yml build 
