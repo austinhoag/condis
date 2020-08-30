@@ -1,7 +1,5 @@
 from flask import (Flask,flash, render_template,
 	request, redirect)
-from celery import Celery
-from celery.schedules import crontab
 import redis
 from datetime import timedelta
 import os
@@ -55,11 +53,10 @@ def create_app():
 	""" Create the flask app instance"""
 	app = Flask(__name__)
 
-	app.config['CELERYBEAT_SCHEDULE'] = celery_beat_schedule
 	app.config['WTF_CSRF_TIME_LIMIT'] = 3600 # seconds
 	SECRET_KEY = os.urandom(32)
 	app.config['SECRET_KEY'] = SECRET_KEY
-	cel.conf.update(app.config)
+
 	csrf = CSRFProtect(app)
 
 	from condis.main.routes import main

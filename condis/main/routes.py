@@ -14,7 +14,6 @@ import numpy as np
 
 from .forms import gpsForm, SetupForm, SetupRecurringForm, EntryForm
 from .utils import expand_dataframe, splitme_zip, hit_grid_api
-from . import tasks 
 from .tables import create_dynamic_calendar_table
 
 
@@ -145,10 +144,6 @@ def resolveAddress(address):
 	gps_str = f'{latitude:.5f},{longitude:.5f}'
 	return gps_str
 
-@main.route("/test_celery") 
-def test_celery(): 
-	tasks.send_daily_emails.delay()
-	return "executed task"
 
 @main.route("/test_calendar") 
 def test_calendar(): 

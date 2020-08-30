@@ -1,4 +1,4 @@
-docker rm -f $(docker ps -a | grep "flaskcondis" | awk '{print $1}')
+docker rm -f $(docker ps -a | grep "flaskcondis:latest" | awk '{print $1}')
 
 docker build -f ./flask.Dockerfile -t flaskcondis:latest .
 
