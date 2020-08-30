@@ -34,11 +34,12 @@ def smtp_connect():
 
 def set_schema():
 	if os.environ['FLASK_MODE'] == 'TEST':
+		from schemas import condis
 		dj.config['database.host'] = 'db'
 		dj.config['database.user'] = 'root'
 		dj.config['database.password'] = 'simple'
 		dj.config['database.port'] = 3306 # inside the db container
-		db = dj.create_virtual_module('test_db','test_db') # creates the schema if it does not already exist. Can't add tables from within the app because create_schema=False
+		db = dj.create_virtual_module('test_db','test_db',create_schema=True) # creates the schema if it does not already exist. Can't add tables from within the app because create_schema=False
 	if os.environ['FLASK_MODE'] == 'DEV':
 		dj.config['database.host'] = 'db'
 		dj.config['database.user'] = 'root'
