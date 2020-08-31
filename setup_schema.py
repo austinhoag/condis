@@ -1,1 +1,0 @@
-from schemas import condis # this is enough to rebuild the schema

@@ -17,9 +17,8 @@ class EntryForm(FlaskForm):
 	gps_str = StringField('Latitude,Longitude (e.g. 36.131,-115.425):',validators=[InputRequired()])
 	address = StringField('''Address or Zip Code (e.g. "Red Rock Canyon, NV USA" or "89161 USA"):''',validators=[Optional()])
 
-	temp = StringField(Markup('Temperature (&deg;F)'),id='temp-field')
 	time = StringField(Markup('Time of day (local time)'),id='time-field')
-
+	temp = StringField(Markup('Temperature (&deg;F)'),id='temp-field')
 	humidity = StringField('Relative Humidity (%)',id='humidity-field')
 	precip = StringField('Percent chance of precipitation (%)',id='precip-field')
 	email_check = BooleanField("Check to also receive an email whenever these conditions are met.")

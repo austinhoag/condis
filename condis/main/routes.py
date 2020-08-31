@@ -15,7 +15,7 @@ import numpy as np
 from .forms import gpsForm, SetupForm, SetupRecurringForm, EntryForm
 from .utils import expand_dataframe, splitme_zip, hit_grid_api
 from .tables import create_dynamic_calendar_table
-
+import logging
 
 
 from condis import db
@@ -26,12 +26,27 @@ time_format = '%-I %p' # e.g. "4 AM"
 
 geolocator = Nominatim(user_agent="my-app")
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.propagate=False
+
+formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
+
+''' Make the file handler to deal with logging to file '''
+
+stream_handler = logging.StreamHandler() # level already set at debug from logger.setLevel() above
+
+stream_handler.setFormatter(formatter)
+
+logger.addHandler(stream_handler)
+
 @main.route("/",methods=['GET','POST']) 
 def home(): 
 	form = EntryForm()
 	# form.gps_str.data = '41.744, -74.197'
 
 	if request.method == 'POST':
+		logger.debug("POST request")
 		if form.validate_on_submit():
 			submit_keys = [x for x in form._fields.keys() if 'submit' in x]
 			no_results=True
