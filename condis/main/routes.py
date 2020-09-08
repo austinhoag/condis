@@ -11,7 +11,6 @@ import pandas as pd
 from geopy.geocoders import Nominatim
 import numpy as np
 
-
 from .forms import gpsForm, SetupForm, SetupRecurringForm, EntryForm
 from .utils import expand_dataframe, splitme_zip, hit_grid_api
 from .tables import create_dynamic_calendar_table
@@ -60,7 +59,10 @@ def home():
 			"""
 			grid_response = requests.get(url_for('main.find_grid',
 					latitude=latitude,longitude=longitude,_external=True))
-			grid_dict = grid_response.json()
+			try:
+				grid_dict = grid_response.json()
+			except:
+				abort(503) # redirects to the 503 error page
 			grid_id = grid_dict['grid_id']
 			grid_x = grid_dict['grid_x']
 			grid_y = grid_dict['grid_y']

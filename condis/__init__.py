@@ -1,6 +1,5 @@
 from flask import (Flask,flash, render_template,
 	request, redirect)
-import redis
 from datetime import timedelta
 import os
 from flask_wtf.csrf import CSRFProtect
@@ -53,7 +52,7 @@ def set_schema():
 		dj.config['database.user'] = 'root'
 		dj.config['database.password'] = 'simple'
 		dj.config['database.port'] = 3306 # inside the db container
-		db = dj.create_virtual_module('condis_db','condis_db') 
+		db = dj.create_virtual_module('prod_db','prod_db') 
 	return db
 
 db = set_schema()
