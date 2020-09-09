@@ -8,9 +8,9 @@ services:
     volumes:
       - .:/app 
     ports:
-      - '8080:5000'
+      - '8000:5000'
     restart: unless-stopped
 networks:
   default:
     external:
-      name: condis-prod
+      name: condis-dev

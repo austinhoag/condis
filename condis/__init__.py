@@ -48,9 +48,9 @@ def set_schema():
 		dj.config['database.port'] = 3306 # inside the db container
 		db = dj.create_virtual_module('dev_db','dev_db') # creates the schema if it does not already exist. Can't add tables from within the app because create_schema=False
 	elif os.environ['FLASK_MODE'] == 'PROD':
-		dj.config['database.host'] = 'db'
-		dj.config['database.user'] = 'root'
-		dj.config['database.password'] = 'simple'
+		dj.config['database.host'] = 'dbdev'
+		dj.config['database.user'] = 'user'
+		dj.config['database.password'] = 'pass'
 		dj.config['database.port'] = 3306 # inside the db container
 		db = dj.create_virtual_module('prod_db','prod_db') 
 	return db
