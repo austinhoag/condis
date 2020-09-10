@@ -28,6 +28,7 @@ def test_client():
 	print('----------Setup test client----------')
 
 	app = create_app()
+	app.config['WTF_CSRF_ENABLED'] = False
 	testing_client = app.test_client()
 
 	""" Simulate a chrome user """

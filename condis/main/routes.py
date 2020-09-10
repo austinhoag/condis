@@ -42,11 +42,11 @@ logger.addHandler(stream_handler)
 @main.route("/",methods=['GET','POST']) 
 def home(): 
 	form = EntryForm()
-	# form.gps_str.data = '41.744, -74.197'
-
+	print("In HOME")
 	if request.method == 'POST':
 		logger.debug("POST request")
 		if form.validate_on_submit():
+			logger.debug("Form validated")
 			submit_keys = [x for x in form._fields.keys() if 'submit' in x]
 			no_results=True
 			""" Get form input """

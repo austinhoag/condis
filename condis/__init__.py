@@ -35,9 +35,9 @@ def set_schema():
 	if os.environ['FLASK_MODE'] == 'TEST':
 		print("FLASK_MODE is TEST")
 		from schemas import condis
-		dj.config['database.host'] = 'dbtest'
-		dj.config['database.user'] = 'root'
-		dj.config['database.password'] = 'simple'
+		dj.config['database.host'] = 'dbdev'
+		dj.config['database.user'] = 'user'
+		dj.config['database.password'] = 'pass'
 		dj.config['database.port'] = 3306 # inside the db container
 		# db = dj.create_virtual_module('test_db','test_db',create_schema=True) # creates the schema if it does not already exist. Can't add tables from within the app because create_schema=False
 		db = dj.create_virtual_module('test_db','test_db') # creates the schema if it does not already exist. Can't add tables from within the app because create_schema=False
@@ -61,10 +61,9 @@ def create_app():
 	""" Create the flask app instance"""
 	app = Flask(__name__)
 
-	app.config['WTF_CSRF_TIME_LIMIT'] = 3600 # seconds
-	SECRET_KEY = os.urandom(32)
-	app.config['SECRET_KEY'] = SECRET_KEY
+	app.config['WTF_CSRF_TIME_LIMIT'] = 36000 # seconds
 
+	app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 	csrf = CSRFProtect(app)
 
 	from condis.main.routes import main
@@ -83,6 +82,7 @@ def create_app():
 			flash(f"The form expired after {csrf_time_limit_hours} hours. "
 			      f"Please continue completing the form within the next {csrf_time_limit_hours} hours.","warning")
 		else:
+			print(e.description)
 			return render_template('errors/500.html')
 		next_url = os.path.join('/',*request.url.split('?')[0].split('/')[3:])
 		return redirect(next_url)
