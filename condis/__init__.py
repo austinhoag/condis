@@ -36,21 +36,21 @@ def set_schema():
 		print("FLASK_MODE is TEST")
 		from schemas import condis
 		dj.config['database.host'] = 'dbtest'
-		dj.config['database.user'] = 'root'
-		dj.config['database.password'] = 'simple'
+		dj.config['database.user'] = os.environ['DB_USER']
+		dj.config['database.password'] = os.environ['DB_PASS']
 		dj.config['database.port'] = 3306 # inside the db container
 		# db = dj.create_virtual_module('test_db','test_db',create_schema=True) # creates the schema if it does not already exist. Can't add tables from within the app because create_schema=False
 		db = dj.create_virtual_module('test_db','test_db') # creates the schema if it does not already exist. Can't add tables from within the app because create_schema=False
 	if os.environ['FLASK_MODE'] == 'DEV':
 		dj.config['database.host'] = 'dbdev'
-		dj.config['database.user'] = 'user'
-		dj.config['database.password'] = 'pass'
+		dj.config['database.user'] = os.environ['DB_USER']
+		dj.config['database.password'] = os.environ['DB_PASS']
 		dj.config['database.port'] = 3306 # inside the db container
 		db = dj.create_virtual_module('dev_db','dev_db') # creates the schema if it does not already exist. Can't add tables from within the app because create_schema=False
 	elif os.environ['FLASK_MODE'] == 'PROD':
 		dj.config['database.host'] = 'db'
-		dj.config['database.user'] = 'root'
-		dj.config['database.password'] = 'simple'
+		dj.config['database.user'] = os.environ['DB_USER']
+		dj.config['database.password'] = os.environ['DB_PASS']
 		dj.config['database.port'] = 3306 # inside the db container
 		db = dj.create_virtual_module('prod_db','prod_db') 
 	return db
